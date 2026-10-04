@@ -1,0 +1,7 @@
+Experiment,Trees,Contamination,Precision,Recall,F1,False Positives,False Negatives
+IF_100_auto,100,auto,0.4615,1.0,0.6316,7,0
+IF_200_auto,200,auto,0.4615,1.0,0.6316,7,0
+IF_300_auto,300,auto,0.4545,0.8333,0.5882,6,1
+IF_200_001,200,0.01,0.0,0.0,0.0,0,6
+IF_200_002,200,0.02,0.0,0.0,0.0,0,6
+IF_200_003,200,0.03,0.0,0.0,0.0,1,6

@@ -1,0 +1,184 @@
+import pandas as pd
+import os
+
+
+INPUT_FILE = "dataset/snapshots/disk_io_experiment.csv"
+OUTPUT_FILE = "dataset/processed/disk_io_labeled.csv"
+
+
+# --------------------------------------------------
+# 1. Load raw disk-I/O experiment
+# --------------------------------------------------
+
+print("=" * 60)
+print("DISK I/O EXPERIMENT LABELING")
+print("=" * 60)
+
+df = pd.read_csv(INPUT_FILE)
+
+print(f"\nRaw samples: {len(df)}")
+
+
+# --------------------------------------------------
+# 2. Calculate time difference
+# --------------------------------------------------
+
+df["timestamp"] = pd.to_datetime(df["timestamp"])
+
+df["time_diff"] = (
+    df["timestamp"]
+    .diff()
+    .dt.total_seconds()
+)
+
+
+# --------------------------------------------------
+# 3. Calculate disk I/O rates
+# --------------------------------------------------
+
+df["disk_read_delta"] = (
+    df["disk_read_bytes"].diff()
+)
+
+df["disk_write_delta"] = (
+    df["disk_write_bytes"].diff()
+)
+
+
+# Handle first sample and counter resets
+df["disk_read_delta"] = (
+    df["disk_read_delta"]
+    .fillna(0)
+    .clip(lower=0)
+)
+
+df["disk_write_delta"] = (
+    df["disk_write_delta"]
+    .fillna(0)
+    .clip(lower=0)
+)
+
+
+# Avoid division by zero
+time_diff = df["time_diff"].replace(0, pd.NA)
+
+df["disk_read_rate"] = (
+    df["disk_read_delta"] / time_diff
+).fillna(0)
+
+df["disk_write_rate"] = (
+    df["disk_write_delta"] / time_diff
+).fillna(0)
+
+
+# --------------------------------------------------
+# 4. Network rates
+# --------------------------------------------------
+
+df["network_in_delta"] = (
+    df["network_in"].diff()
+    .fillna(0)
+    .clip(lower=0)
+)
+
+df["network_out_delta"] = (
+    df["network_out"].diff()
+    .fillna(0)
+    .clip(lower=0)
+)
+
+df["network_in_rate"] = (
+    df["network_in_delta"] / time_diff
+).fillna(0)
+
+df["network_out_rate"] = (
+    df["network_out_delta"] / time_diff
+).fillna(0)
+
+
+# --------------------------------------------------
+# 5. Label controlled disk-I/O anomaly samples
+# --------------------------------------------------
+
+df["label"] = 0
+
+disk_anomaly_timestamps = [
+    "2026-10-04 10:52:47",
+    "2026-10-04 10:52:53",
+    "2026-10-04 10:52:59",
+    "2026-10-04 10:53:05",
+]
+
+df.loc[
+    df["timestamp"].isin(
+        pd.to_datetime(disk_anomaly_timestamps)
+    ),
+    "label"
+] = 1
+
+
+# --------------------------------------------------
+# 6. Select ML features
+# --------------------------------------------------
+
+output = df[
+    [
+        "timestamp",
+        "cpu",
+        "memory",
+        "disk",
+        "network_in_rate",
+        "network_out_rate",
+        "disk_read_rate",
+        "disk_write_rate",
+        "load",
+        "process_count",
+        "label",
+    ]
+].copy()
+
+
+# --------------------------------------------------
+# 7. Save labeled dataset
+# --------------------------------------------------
+
+os.makedirs(
+    os.path.dirname(OUTPUT_FILE),
+    exist_ok=True
+)
+
+output.to_csv(
+    OUTPUT_FILE,
+    index=False
+)
+
+
+# --------------------------------------------------
+# 8. Display summary
+# --------------------------------------------------
+
+print(f"\nProcessed samples: {len(output)}")
+
+print("\nLabel distribution:")
+print(output["label"].value_counts())
+
+print("\nKnown anomaly samples:")
+print(
+    output[
+        output["label"] == 1
+    ][
+        [
+            "timestamp",
+            "disk",
+            "disk_write_rate",
+            "load",
+            "label",
+        ]
+    ].to_string(index=False)
+)
+
+print("\nSaved to:")
+print(OUTPUT_FILE)
+
+print("\nDisk-I/O labeling completed successfully.")
+
