@@ -12,3 +12,12 @@ dataset/*.csv
 
 # ML model artifacts
 # Keep trained model files versioned for now
+
+# Frontend build output
+dist/
+
+# Local environment files
+*.local
+
+# Logs
+*.log
