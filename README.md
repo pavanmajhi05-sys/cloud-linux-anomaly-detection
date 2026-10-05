@@ -1,26 +1,50 @@
-# Cloud Linux Anomaly Monitor
 
-Machine Learning-Based Anomaly Detection for Cloud-Based Linux Server Resource Monitoring — a TRW project combining Linux system administration, Python, machine learning, and full-stack web development.
+# Cloud Linux AI Monitor
 
-## Research Question
-Can machine-learning techniques detect abnormal behavior in cloud-based Linux servers using system resource metrics?
+Machine Learning-Based Anomaly Detection for Cloud-Based Linux Server Resource Monitoring.
+
+This TRW project monitors Linux server resources, detects abnormal system behavior using Machine Learning, stores monitoring history, exposes REST APIs, and displays the results through a React dashboard.
+
+---
+
+## Project Objective
+
+The goal of this project is to detect abnormal behavior on Linux servers using system resource metrics such as:
+
+- CPU usage
+- Memory usage
+- Disk usage
+- Network traffic
+- Disk I/O
+- Load average
+- Process count
+
+The system uses an Isolation Forest machine-learning model to identify unusual resource behavior.
+
+---
 
 ## Architecture
-RHEL Server → Monitoring Agent (psutil) → ML Anomaly Model → FastAPI → React Dashboard
 
-## Project Structure
-- `backend/` — FastAPI application
-- `frontend/react-dashboard/` — React dashboard
-- `monitoring/` — Metric collection agent
-- `ml/` — Preprocessing, training, prediction, evaluation
-- `scripts/` — Automation (Bash, systemd setup)
-- `dataset/` — Collected and public datasets
-- `notebooks/` — Experimentation
-- `docs/` — TRW documentation, paper drafts
-- `screenshots/` — Demo evidence
-
-## Status
-🚧 In development — Phase 1 (data collection)
-
-## Author
-Majhi Pavan
+```text
+RHEL Linux Server
+       |
+       v
+Python Monitoring / psutil
+       |
+       v
+Feature Engineering
+       |
+       v
+Isolation Forest ML Model
+       |
+       v
+Anomaly Score + Severity
+       |
+       v
+SQLite Database
+       |
+       v
+FastAPI REST API
+       |
+       v
+React + Recharts Dashboard
